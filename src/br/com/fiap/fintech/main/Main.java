@@ -7,7 +7,7 @@ public class Main {
         Recebimento salario = new Recebimento("05/10/2025", 3500.0, "Salário Mensal", "Empresa Parceira");
 
         Usuario user = new Usuario();
-        user.setNomeCompleto("João da Silva"); // Usando o Setter
+        user.setNomeCompleto("João da Silva");
 
         System.out.println("=== TESTE ATIVIDADE HERANÇA E ENCAPSULAMENTO ===\n");
 
