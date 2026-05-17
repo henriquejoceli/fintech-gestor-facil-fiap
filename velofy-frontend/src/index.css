@@ -1,0 +1,28 @@
+:root {
+  --bg-principal: #121212;      /* Fundo escuro do app */
+  --bg-card: #1e1e1e;           /* Fundo dos cards e blocos */
+  --bg-input: #262626;          /* Fundo dos campos de texto */
+  --verde-velofy: #00d094;      /* O verde esmeralda icônico */
+  --texto-principal: #f5f5f5;   /* Texto branco/cinza claro */
+  --texto-secundario: #94a3b8;  /* Texto de suporte/legendas */
+  --borda: #2d2d2d;             /* Cor das linhas divisórias */
+  --erro: #ef4444;              /* Vermelho para exclusões e erros */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-principal);
+  color: var(--texto-principal);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Estilização padrão de inputs para o app inteiro */
+input, select, button {
+  font-family: inherit;
+}
