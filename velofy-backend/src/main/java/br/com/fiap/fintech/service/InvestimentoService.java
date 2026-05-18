@@ -28,8 +28,26 @@ public class InvestimentoService {
     // Registra uma movimentação (Aporte ou Resgate) e atualiza o saldo do ativo
     @Transactional
     public OcorrenciaInvestimento movimentar(OcorrenciaInvestimento ocorrencia) {
-        Investimento investimento = investimentoRepository.findById(ocorrencia.getInvestimento().getId())
-                .orElseThrow(() -> new RuntimeException("Investimento não encontrado"));
+        Investimento investimento;
+
+        // 🎯 SE O INVESTIMENTO VIER SEM ID (OU ID ZERO), SIGNIFICA QUE É UM NOVO ATIVO!
+        if (ocorrencia.getInvestimento() == null || ocorrencia.getInvestimento().getId() == null || ocorrencia.getInvestimento().getId() == 0) {
+            
+            investimento = ocorrencia.getInvestimento();
+            if (investimento == null) {
+                throw new RuntimeException("Dados do investimento não informados");
+            }
+            
+            // Inicializa o valor zerado para o cálculo do aporte funcionar corretamente
+            investimento.setValorAplicado(BigDecimal.ZERO);
+            
+            // Salva o investimento pai primeiro para gerar o ID no banco
+            investimento = investimentoRepository.save(investimento);
+        } else {
+            // Se veio o ID, busca o investimento que já existe no banco
+            investimento = investimentoRepository.findById(ocorrencia.getInvestimento().getId())
+                    .orElseThrow(() -> new RuntimeException("Investimento não encontrado"));
+        }
 
         BigDecimal valorMovimentado = ocorrencia.getValor();
         BigDecimal saldoAtual = investimento.getValorAplicado();
@@ -46,7 +64,7 @@ public class InvestimentoService {
         // Salva a alteração no saldo do investimento
         investimentoRepository.save(investimento);
         
-        // Salva o log da ocorrência (extrato)
+        // Salva o log da ocorrência (extrato) vinculando o ID correto
         ocorrencia.setInvestimento(investimento);
         return ocorrenciaRepository.save(ocorrencia);
     }

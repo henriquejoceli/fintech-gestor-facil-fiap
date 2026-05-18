@@ -1,5 +1,6 @@
 br/com/fiap/fintech/model/TipoInvestimento.class
 br/com/fiap/fintech/model/Transacao.class
+br/com/fiap/fintech/CorsConfig$1.class
 br/com/fiap/fintech/controller/CadastroController.class
 br/com/fiap/fintech/repository/InvestimentoRepository.class
 br/com/fiap/fintech/model/Conta.class
@@ -22,6 +23,7 @@ br/com/fiap/fintech/service/CadastroService.class
 br/com/fiap/fintech/service/ContaService.class
 br/com/fiap/fintech/model/OcorrenciaCadastro.class
 br/com/fiap/fintech/controller/ContaController.class
+br/com/fiap/fintech/CorsConfig.class
 br/com/fiap/fintech/repository/TransacaoRepository.class
 br/com/fiap/fintech/model/TipoOcorrenciaCadastro.class
 br/com/fiap/fintech/controller/InvestimentoController.class

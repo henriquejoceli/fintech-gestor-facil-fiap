@@ -75,11 +75,10 @@ export default function Investimentos() {
         tipoInvestimento: { id: Number(tipoSelecionado) },
         nomeInvestimento: nomeAtivo.toUpperCase(),
         tipoCriacao: 'M',
-        taxaRendimento: parseFloat(taxaRendimento) || 0,
         status: 'A'
       },
       valor: parseFloat(valorAplicado),
-      tipoMovimentacao: 'E' // Entrada/Aporte Inicial
+      tipoMovimentacao: 'E' // Entrada/Aporte
     };
 
     try {
@@ -92,7 +91,14 @@ export default function Investimentos() {
       
       carregarInvestimentos(contaSelecionada);
     } catch (err) {
-      setErro(err.response?.data || 'Erro ao registrar investimento.');
+      console.error("Erro ao registrar investimento:", err);
+      
+      // Captura a mensagem real enviada pelo "return ResponseEntity.badRequest().body(e.getMessage());" do seu Java
+      const mensagemErro = err.response?.data && typeof err.response.data === 'object'
+        ? err.response.data.message || err.response.data.error || 'Erro na requisição'
+        : err.response?.data || 'Erro ao registrar investimento.';
+        
+      setErro(mensagemErro);
     }
   };
 

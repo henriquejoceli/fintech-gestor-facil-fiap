@@ -4,6 +4,7 @@
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/model/TipoOcorrenciaCadastro.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/model/Conta.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/dto/LoginRequest.java
+/workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/CorsConfig.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/model/TipoGenero.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/InvestimentoRepository.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/controller/ContaController.java

@@ -72,31 +72,36 @@ export function TransacoesGlobal() {
       return;
     }
 
-    // Monta o objeto de acordo com os relacionamentos do JPA no Java
+    // Monta o objeto batendo com as colunas do Java
     const novaTransacao = {
-      conta: { id: Number(contaSelecionada) },
-      tipoTransacao: { id: tipoTransacao === 'C' ? 2 : 1 }, // 1 para Débito, 2 para Crédito
+      tipoTransacao: { id: tipoTransacao === 'C' ? 2 : 1 }, 
       tipoCategoria: { id: Number(categoriaSelecionada) },
       descricao: descricao.toUpperCase(),
       valor: parseFloat(valor),
+      tipoCriacao: 'M', // 🎯 Adicionado para resolver o NOT NULL do banco
       status: 'A'
     };
 
     try {
-      // Dispara o POST para o controller do Java salvar e atualizar o saldo da conta
-      await api.post('/transacoes', novaTransacao);
+      // 🚀 CORREÇÃO DA ROTA: Mapeia exatamente para o /api/transacoes/conta/{idConta} do seu Java
+      await api.post(`/transacoes/conta/${contaSelecionada}`, novaTransacao);
       
       setSucesso(true);
       setDescricao('');
       setValor('');
       
-      // Recarrega o extrato atualizado
       carregarDados();
     } catch (err) {
-      setErro(err.response?.data || 'Erro ao lançar movimentação.');
+      console.error("Erro ao salvar transação:", err);
+      
+      // 🎯 BLINDAGEM CONTRA TELA PRETA: Evita printar o objeto de erro do Spring diretamente
+      const mensagemErro = err.response?.data && typeof err.response.data === 'object'
+        ? err.response.data.message || err.response.data.error || 'Erro na requisição'
+        : err.response?.data || 'Erro ao lançar movimentação.';
+        
+      setErro(mensagemErro);
     }
   };
-
   return (
     <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
       <Navbar />

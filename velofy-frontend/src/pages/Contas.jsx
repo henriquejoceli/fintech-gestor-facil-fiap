@@ -4,11 +4,11 @@ import api from '../services/api';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 
-export default function Contas() { // Alterado para export default para seguran√ßa de rota
+export default function Contas() { 
   const [contas, setContas] = useState([]);
   const [nomeInstituicao, setNomeInstituicao] = useState('');
   const [saldoInicial, setSaldoInicial] = useState('');
-  const [tipoConta, setTipoConta] = useState('CORRENTE');
+  const [tipoConta, setTipoConta] = useState('PF'); // Alterado default para bater com o select
   
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
@@ -18,7 +18,6 @@ export default function Contas() { // Alterado para export default para seguran√
       const idUsuario = localStorage.getItem('usuarioId') || 1;
       const resposta = await api.get(`/contas/usuario/${idUsuario}`);
       
-      // TRAVA DE SEGURAN√áA: Garante que s√≥ vai atualizar o estado se for uma lista real
       if (resposta.data && Array.isArray(resposta.data)) {
         setContas(resposta.data);
       } else {
@@ -26,7 +25,7 @@ export default function Contas() { // Alterado para export default para seguran√
       }
     } catch (err) {
       console.error("Erro ao carregar contas", err);
-      setContas([]); // Evita que a tela quebre se a API falhar
+      setContas([]); 
     }
   };
 
@@ -45,7 +44,7 @@ export default function Contas() { // Alterado para export default para seguran√
     }
 
     const novaConta = {
-      usuario: { id: Number(localStorage.getItem('usuarioId') || 1) },
+      cadastro: { id: Number(localStorage.getItem('usuarioId') || 1) }, 
       nomeInstituicao: nomeInstituicao.toUpperCase(),
       saldoAtual: parseFloat(saldoInicial),
       tipoConta: { id: tipoConta === 'PJ' ? 2 : 1 }, 
@@ -53,13 +52,22 @@ export default function Contas() { // Alterado para export default para seguran√
     };
 
     try {
-      await api.post('/contas', novaConta);
+      const idUsuario = Number(localStorage.getItem('usuarioId') || 1);
+
+      await api.post(`/contas/usuario/${idUsuario}`, novaConta);
+      
       setSucesso(true);
       setNomeInstituicao('');
       setSaldoInicial('');
       carregarContas();
     } catch (err) {
-      setErro(err.response?.data || 'Erro ao cadastrar conta.');
+      console.error("Erro completo da requisi√ß√£o:", err);
+      
+      const mensagemErro = err.response?.data && typeof err.response.data === 'object'
+        ? err.response.data.message || err.response.data.error || 'Erro na requisi√ß√£o'
+        : err.response?.data || 'Erro ao cadastrar conta.';
+        
+      setErro(mensagemErro);
     }
   };
 
