@@ -25,16 +25,6 @@ public class OcorrenciaCadastro {
     @Column(name = "data_cadastro", updatable = false)
     private LocalDateTime dataCadastro;
 
-    @PrePersist
-    protected void onCreate() {
-        dataCadastro = LocalDateTime.now();
-        if (descricao != null) {
-            descricao = descricao.toUpperCase();
-        }
-    }
-
-    // --- GETTERS AND SETTERS MANUALMENTE ---
-
     public Integer getId() {
         return id;
     }

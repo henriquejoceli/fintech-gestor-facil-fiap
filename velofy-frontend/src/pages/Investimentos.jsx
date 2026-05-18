@@ -5,22 +5,14 @@ import { Navbar } from '../components/Navbar.jsx';
 import { Footer } from '../components/Footer.jsx';
 
 export default function Investimentos() {
-  const tiposAtivos = [
-    { id: 1, nome: 'Poupança' },
-    { id: 2, nome: 'Tesouro Direto' },
-    { id: 3, nome: 'CDB' },
-    { id: 4, nome: 'LCI / LCA' },
-    { id: 5, nome: 'Fundos de Investimento' },
-    { id: 6, nome: 'Ações / Renda Variável' }
-  ];
-
-  // Estados
+  // Estados Dinâmicos vindos do Java
   const [contas, setContas] = useState([]);
   const [investimentos, setInvestimentos] = useState([]);
+  const [tiposAtivos, setTiposAtivos] = useState([]);
   
   // Estados do Formulário
   const [contaSelecionada, setContaSelecionada] = useState('');
-  const [tipoSelecionado, setTipoSelecionado] = useState('1');
+  const [tipoSelecionado, setTipoSelecionado] = useState('');
   const [nomeAtivo, setNomeAtivo] = useState('');
   const [valorAplicado, setValorAplicado] = useState('');
   const [taxaRendimento, setTaxaRendimento] = useState('');
@@ -32,14 +24,27 @@ export default function Investimentos() {
     async function carregarDadosIniciais() {
       try {
         const idUsuario = localStorage.getItem('usuarioId') || 1;
+        
+        // 1. Busca os tipos de investimentos dinâmicos da t_tipoinvestimento
+        const respostaTipos = await api.get('/tipos-investimento');
+        setTiposAtivos(respostaTipos.data);
+        if (respostaTipos.data.length > 0) {
+          setTipoSelecionado(respostaTipos.data[0].id);
+        }
+
+        // 2. Busca as contas do usuário
         const respostaContas = await api.get(`/contas/usuario/${idUsuario}`);
         setContas(respostaContas.data);
+
         if (respostaContas.data.length > 0) {
+          // 2. Ele pega a PRIMEIRA conta da lista (ex: ID 1) e joga no select
           setContaSelecionada(respostaContas.data[0].id);
+          
+          // 3. Ele busca os investimentos dessa PRIMEIRA conta
           carregarInvestimentos(respostaContas.data[0].id);
         }
       } catch (err) {
-        console.error("Erro ao carregar contas do usuário", err);
+        console.error("Erro ao carregar dados iniciais de investimentos", err);
       }
     }
     carregarDadosIniciais();
@@ -48,6 +53,10 @@ export default function Investimentos() {
   const carregarInvestimentos = async (idConta) => {
     try {
       const resposta = await api.get(`/investimentos/conta/${idConta}`);
+      
+      // 🎯 ADICIONE ESSA LINHA AQUI:
+      console.log("INVESTIMENTOS VINDOS DO JAVA:", resposta.data);
+      
       setInvestimentos(resposta.data);
     } catch (err) {
       console.error("Erro ao buscar investimentos", err);
@@ -78,7 +87,7 @@ export default function Investimentos() {
         status: 'A'
       },
       valor: parseFloat(valorAplicado),
-      tipoMovimentacao: 'E' // Entrada/Aporte
+      tipoMovimentacao: 'E' 
     };
 
     try {
@@ -90,27 +99,22 @@ export default function Investimentos() {
       setTaxaRendimento('');
       
       carregarInvestimentos(contaSelecionada);
+
     } catch (err) {
       console.error("Erro ao registrar investimento:", err);
-      
-      // Captura a mensagem real enviada pelo "return ResponseEntity.badRequest().body(e.getMessage());" do seu Java
       const mensagemErro = err.response?.data && typeof err.response.data === 'object'
-        ? err.response.data.message || err.response.data.error || 'Erro na requisição'
+        ? err.response.data.message || err.response.data.error || 'Erro interno'
         : err.response?.data || 'Erro ao registrar investimento.';
-        
       setErro(mensagemErro);
     }
   };
 
   return (
     <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* HEADER INTEGRADO */}
       <Navbar />
 
-      {/* CONTEÚDO PRINCIPAL */}
-      <div style={{ padding: '32px 24px', boxSizing: 'border-box', flex: 1, maxWidt: '1200px', margin: '0 auto', width: '100%' }}>
+      <div style={{ padding: '32px 24px', boxSizing: 'border-box', flex: 1, maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
         
-        {/* TÍTULO */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
           <TrendingUp size={24} color="#00e676" />
           <h1 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: '#fff' }}>Meus Investimentos</h1>
@@ -118,7 +122,7 @@ export default function Investimentos() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
           
-          {/* FORMULÁRIO DE CADASTRO */}
+          {/* FORMULÁRIO */}
           <div style={{ backgroundColor: '#0f0f0f', padding: '24px', borderRadius: '12px', border: '1px solid #1f1f1f' }}>
             <h2 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: '600', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Plus size={20} color="#00e676" /> Novo Aporte
@@ -159,7 +163,7 @@ export default function Investimentos() {
                   style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #2a2a2a', backgroundColor: '#141414', color: '#fff' }}
                 >
                   {tiposAtivos.map(t => (
-                    <option key={t.id} value={t.id}>{t.nome}</option>
+                    <option key={t.id} value={t.id}>{t.descricao}</option>
                   ))}
                 </select>
               </div>
@@ -202,7 +206,7 @@ export default function Investimentos() {
                 </div>
               </div>
 
-              <button type="submit" style={{ width: '100%', backgroundColor: '#00e676', color: '#000', padding: '14px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'} onMouseOut={(e) => e.currentTarget.style.opacity = '1'}>
+              <button type="submit" style={{ width: '100%', backgroundColor: '#00e676', color: '#000', padding: '14px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>
                 Confirmar Aplicação
               </button>
             </form>
@@ -221,7 +225,10 @@ export default function Investimentos() {
                     <div>
                       <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', color: '#fff', fontWeight: '600' }}>{inv.nomeInvestimento}</h4>
                       <span style={{ fontSize: '12px', color: '#aaa', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Wallet size={12} color="#00e676" /> Retorno: {inv.taxaRendimento}% a.a.
+                        <span style={{ backgroundColor: '#1f1f1f', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', color: '#00e676', marginRight: '4px' }}>
+                          {inv.tipoInvestimento?.descricao || 'Ativo'}
+                        </span>
+                        <Wallet size={12} color="#00e676" style={{ marginLeft: '4px' }} /> Retorno: {inv.taxaRendimento}% a.a.
                       </span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -241,8 +248,6 @@ export default function Investimentos() {
 
         </div>
       </div>
-
-      {/* FOOTER INTEGRADO */}
       <Footer />
     </div>
   );

@@ -60,6 +60,12 @@ public class CadastroService {
 
         cadastroExistente.setNome(dadosAtualizados.getNome());
         cadastroExistente.setEmail(dadosAtualizados.getEmail());
+        
+        cadastroExistente.setNomeSocial(dadosAtualizados.getNomeSocial());
+        
+        if (dadosAtualizados.getFotoPerfil() != null) {
+            cadastroExistente.setFotoPerfil(dadosAtualizados.getFotoPerfil());
+        }
 
         if (dadosAtualizados.getSenha() != null && !dadosAtualizados.getSenha().isEmpty()) {
             cadastroExistente.setSenha(passwordEncoder.encode(dadosAtualizados.getSenha()));

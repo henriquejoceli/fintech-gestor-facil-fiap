@@ -22,6 +22,9 @@ public class Cadastro {
     @Column(nullable = false, length = 100)
     private String nome;
 
+    @Column(name = "nome_social", length = 100)
+    private String nomeSocial;
+
     @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
 
@@ -30,6 +33,10 @@ public class Cadastro {
 
     @Column(nullable = false, length = 255)
     private String senha;
+
+    @Lob
+    @Column(name = "foto_perfil")
+    private String fotoPerfil;
 
     @Column(name = "data_cadastro", insertable = false, updatable = false)
     private LocalDateTime dataCadastro;
@@ -55,6 +62,7 @@ public class Cadastro {
         this.status = "A";
     }
 
+    // --- GETTERS AND SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -64,6 +72,9 @@ public class Cadastro {
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
+    public String getNomeSocial() { return nomeSocial; }
+    public void setNomeSocial(String nomeSocial) { this.nomeSocial = nomeSocial; }
+
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
 
@@ -72,6 +83,9 @@ public class Cadastro {
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
+
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
 
     public LocalDateTime getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }

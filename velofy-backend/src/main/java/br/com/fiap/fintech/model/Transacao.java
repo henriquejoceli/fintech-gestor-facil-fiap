@@ -1,7 +1,6 @@
 package br.com.fiap.fintech.model;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,8 +22,11 @@ public class Transacao {
     private TipoTransacao tipoTransacao;
 
     @ManyToOne
-    @JoinColumn(name = "id_tipocategoria", nullable = false)
+    @JoinColumn(name = "id_tipocategoria") // Permitindo NULL no banco para conciliação automática
     private TipoCategoria tipoCategoria;
+
+    @Column(name = "id_externo_api")
+    private String idExternoApi;
 
     @Column(name = "tipo_criacao", length = 1, nullable = false)
     private String tipoCriacao = "M";
@@ -32,8 +34,11 @@ public class Transacao {
     @Column(nullable = false, precision = 20, scale = 2)
     private BigDecimal valor;
 
-    @Column(length = 100)
+    @Column(name = "descricao")
     private String descricao;
+
+    @Column(name = "descricao_original")
+    private String descricaoOriginal;
 
     @Column(name = "data_transacao")
     private LocalDate dataTransacao = LocalDate.now();
@@ -56,8 +61,10 @@ public class Transacao {
         this.valor = valor;
         this.descricao = descricao;
         this.tipoCriacao = "M";
+        this.status = "A";
     }
 
+    // Getters e Setters existentes
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -70,6 +77,9 @@ public class Transacao {
     public TipoCategoria getTipoCategoria() { return tipoCategoria; }
     public void setTipoCategoria(TipoCategoria tipoCategoria) { this.tipoCategoria = tipoCategoria; }
 
+    public String getIdExternoApi() { return idExternoApi; }
+    public void setIdExternoApi(String idExternoApi) { this.idExternoApi = idExternoApi; }
+
     public String getTipoCriacao() { return tipoCriacao; }
     public void setTipoCriacao(String tipoCriacao) { this.tipoCriacao = tipoCriacao; }
 
@@ -78,6 +88,9 @@ public class Transacao {
 
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
+
+    public String getDescricaoOriginal() { return descricaoOriginal; }
+    public void setDescricaoOriginal(String descricaoOriginal) { this.descricaoOriginal = descricaoOriginal; }
 
     public LocalDate getDataTransacao() { return dataTransacao; }
     public void setDataTransacao(LocalDate dataTransacao) { this.dataTransacao = dataTransacao; }

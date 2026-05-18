@@ -4,6 +4,7 @@ import br.com.fiap.fintech.model.Investimento;
 import br.com.fiap.fintech.model.OcorrenciaInvestimento;
 import br.com.fiap.fintech.repository.InvestimentoRepository;
 import br.com.fiap.fintech.repository.OcorrenciaInvestimentoRepository;
+import br.com.fiap.fintech.repository.TipoInvestimentoRepository; // Import adicionado!
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,9 @@ public class InvestimentoService {
 
     @Autowired
     private InvestimentoRepository investimentoRepository;
+
+    @Autowired
+    private TipoInvestimentoRepository tipoInvestimentoRepository; // Injetado com sucesso!
 
     @Autowired
     private OcorrenciaInvestimentoRepository ocorrenciaRepository;
@@ -38,10 +42,25 @@ public class InvestimentoService {
                 throw new RuntimeException("Dados do investimento não informados");
             }
             
+            // 🎯 CORREÇÃO DO ERRO TRANSIENTE:
+            // Pegamos o ID que veio do React, limpamos a instância transiente e buscamos o objeto gerenciado pelo JPA
+            if (investimento.getTipoInvestimento() != null && investimento.getTipoInvestimento().getId() != 0) {
+                Integer idTipo = investimento.getTipoInvestimento().getId();
+                
+                // Busca a entidade persistida e gerenciada direto do banco
+                var tipoGerenciado = tipoInvestimentoRepository.findById(idTipo)
+                        .orElseThrow(() -> new RuntimeException("Tipo de investimento com ID " + idTipo + " não existe no banco."));
+                
+                // Seta o objeto gerenciado pelo Hibernate
+                investimento.setTipoInvestimento(tipoGerenciado);
+            } else {
+                throw new RuntimeException("O tipo de investimento (categoria do ativo) é obrigatório.");
+            }
+            
             // Inicializa o valor zerado para o cálculo do aporte funcionar corretamente
             investimento.setValorAplicado(BigDecimal.ZERO);
             
-            // Salva o investimento pai primeiro para gerar o ID no banco
+            // Salva o investimento pai primeiro para gerar o ID no banco com o Tipo amarrado
             investimento = investimentoRepository.save(investimento);
         } else {
             // Se veio o ID, busca o investimento que já existe no banco

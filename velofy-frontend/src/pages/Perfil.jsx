@@ -7,25 +7,88 @@ export function Perfil() {
     const navigate = useNavigate();
     const usuarioLogado = JSON.parse(localStorage.getItem('@Velofy:user') || '{}');
 
-    const [nome, setNome] = useState(usuarioLogado.nome || '');
-    const [email, setEmail] = useState(usuarioLogado.email || '');
+    const AVATARES_PRE_DEFINIDOS = [
+        { id: 'avatar1', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Felix' }, // Robozinho
+        { id: 'avatar2', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka' }, // Personagem 1
+        { id: 'avatar3', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jake' }, // Personagem 2
+        { id: 'avatar4', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Bubba' } // Aventureiro
+    ];
+
+    // Estados de Controle de Exibição
+    const [perfilAtivo, setPerfilAtivo] = useState(null);
+    const [editando, setEditando] = useState(false);
+
+    // Estados do Formulário de Edição
+    const [nome, setNome] = useState('');
+    const [nomeSocial, setNomeSocial] = useState('');
+    const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
+    const [fotoBase64, setFotoBase64] = useState('');
+
+    // Busca as informações atualizadas direto do Banco de Dados
+    const buscarDadosPerfil = async () => {
+        if (!usuarioLogado.id) {
+            navigate('/');
+            return;
+        }
+        try {
+            const response = await api.get(`/cadastros/${usuarioLogado.id}`);
+            setPerfilAtivo(response.data);
+            
+            // Popula os inputs com as informações do banco
+            setNome(response.data.nome || '');
+            setNomeSocial(response.data.nomeSocial || '');
+            setEmail(response.data.email || '');
+            setFotoBase64(response.data.fotoPerfil || '');
+        } catch (error) {
+            console.error("Erro ao sincronizar perfil:", error);
+        }
+    };
 
     useEffect(() => {
-        if (!usuarioLogado.id) navigate('/');
+        buscarDadosPerfil();
     }, []);
+
+    // Converte a imagem do PC do usuário para texto (Base64)
+    const handleFotoUpload = (e) => {
+        const file = e.target.files[0];
+        
+        if (file) {
+            const limiteTamanho = 2 * 1024 * 1024; 
+            
+            if (file.size > limiteTamanho) {
+                alert("Arquivo muito pesado! Escolha uma foto de perfil de até 2MB.");
+                e.target.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFotoBase64(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleAtualizarPerfil = async (e) => {
         e.preventDefault();
         try {
-            const dadosAtualizados = { nome, email };
-            if (senha) dadosAtualizados.senha = senha; // Só envia a senha se o usuário digitou uma nova
+            const dadosAtualizados = { 
+                nome, 
+                nomeSocial: nomeSocial.trim() === '' ? null : nomeSocial, // Deixa null se estiver vazio
+                email,
+                fotoPerfil: fotoBase64
+            };
+            
+            if (senha) dadosAtualizados.senha = senha;
 
             const response = await api.put(`/cadastros/${usuarioLogado.id}`, dadosAtualizados);
 
-            // Atualiza o localStorage com os novos dados do perfil
+            // Sincroniza os novos dados de sessão
             localStorage.setItem('@Velofy:user', JSON.stringify(response.data));
             alert("Perfil atualizado com sucesso!");
+            setEditando(false);
+            buscarDadosPerfil(); // Atualiza a tela
         } catch (error) {
             console.error(error);
             alert("Erro ao atualizar perfil.");
@@ -50,24 +113,128 @@ export function Perfil() {
     return (
         <div style={{ backgroundColor: '#121212', minHeight: '100vh', color: '#f5f5f5', fontFamily: 'sans-serif' }}>
             <Navbar />
-            <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
-                <div style={{ backgroundColor: '#1e1e1e', padding: '30px', borderRadius: '12px', border: '1px solid #2d2d2d' }}>
-                    <h2 style={{ color: '#00d094', marginBottom: '10px' }}>Configurações do Perfil</h2>
-                    <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '25px' }}>Gerencie seus dados de acesso ou encerre sua conta no Velofy.</p>
+            
+            <div style={{ padding: '40px', maxWidth: editando ? '1100px' : '600px', margin: '0 auto', transition: 'all 0.3s ease' }}>
+                
+                {/* GRID DE LAYOUT FLEXÍVEL */}
+                <div style={{ display: 'grid', gridTemplateColumns: editando ? '1fr 1fr' : '1fr', gap: '30px' }}>
+                    
+                    {/* COLUNA 1: DETALHES DO PERFIL ATUAL */}
+                    <div style={{ backgroundColor: '#1e1e1e', padding: '30px', borderRadius: '12px', border: '1px solid #2d2d2d', textAlign: 'center' }}>
+                        
+                        {/* Avatar Redondo customizável */}
+                        <div>
+                            <label style={styles.inputLabel}>Foto de Perfil</label>
+                            
+                            {/* 🎯 NOVA SEÇÃO: Seleção de Avatares Prontos */}
+                            <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#64748b' }}>Escolha um personagem ou faça upload de um arquivo:</p>
+                            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', justifyContent: 'center', backgroundColor: '#161616', padding: '10px', borderRadius: '8px', border: '1px solid #262626' }}>
+                                {AVATARES_PRE_DEFINIDOS.map((avatar) => (
+                                    <img
+                                        key={avatar.id}
+                                        src={avatar.url}
+                                        alt="Opção de Avatar"
+                                        onClick={() => setFotoBase64(avatar.url)} // 🎯 Ao clicar, o link vira a foto de perfil
+                                        style={{
+                                            width: '50px',
+                                            height: '50px',
+                                            borderRadius: '50%',
+                                            cursor: 'pointer',
+                                            backgroundColor: '#2d2d2d',
+                                            border: fotoBase64 === avatar.url ? '2px solid #00d094' : '2px solid transparent',
+                                            transition: 'all 0.2s ease',
+                                            transform: fotoBase64 === avatar.url ? 'scale(1.1)' : 'scale(1)'
+                                        }}
+                                    />
+                                ))}
+                            </div>
 
-                    <form onSubmit={handleAtualizarPerfil} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                        <input type="text" placeholder="Nome Completo" value={nome} onChange={e => setNome(e.target.value)} required style={styles.input} />
-                        <input type="email" placeholder="E-mail de Acesso" value={email} onChange={e => setEmail(e.target.value)} required style={styles.input} />
-                        <input type="password" placeholder="Nova Senha (deixe em branco para não alterar)" value={senha} onChange={e => setSenha(e.target.value)} style={styles.input} />
+                            {/* Input tradicional por arquivo (mantido como segunda opção) */}
+                            <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleFotoUpload} 
+                                style={{ color: '#94a3b8', fontSize: '14px', width: '100%' }} 
+                            />
+                        </div>
 
-                        <button type="submit" style={styles.btnSalvar}>Salvar Alterações</button>
-                    </form>
+                        {/* 🎯 TRATAMENTO EXCLUSIVO DO NOME SOCIAL: */}
+                        {perfilAtivo?.nomeSocial ? (
+                            <div>
+                                <h2 style={{ color: '#00d094', margin: '0 0 4px 0' }}>{perfilAtivo.nomeSocial}</h2>
+                                <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 20px 0' }}>({perfilAtivo.nome})</p>
+                            </div>
+                        ) : (
+                            <h2 style={{ color: '#00d094', marginBottom: '20px' }}>{perfilAtivo?.nome}</h2>
+                        )}
 
-                    <div style={{ borderTop: '1px solid #2d2d2d', marginTop: '30px', paddingTop: '20px' }}>
-                        <h4 style={{ color: '#ef4444', margin: '0 0 10px 0' }}>Zona de Perigo</h4>
-                        <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '15px' }}>Ao desativar sua conta, você perderá o acesso aos seus extratos e carteiras.</p>
-                        <button onClick={handleDeletarConta} style={styles.btnDeletar}>Inativar Meu Perfil</button>
+                        <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '30px' }}>
+                            <div style={styles.cardInfo}>
+                                <span style={styles.cardLabel}>E-MAIL REGISTRADO</span>
+                                <span>{perfilAtivo?.email}</span>
+                            </div>
+                            <div style={styles.cardInfo}>
+                                <span style={styles.cardLabel}>DATA DE NASCIMENTO</span>
+                                <span>{perfilAtivo?.dataNascimento ? new Date(perfilAtivo.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</span>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            {!editando && (
+                                <button onClick={() => setEditando(true)} style={styles.btnAlterar}>Alterar Meus Dados</button>
+                            )}
+                        </div>
+
+                        <div style={{ borderTop: '1px solid #2d2d2d', marginTop: '30px', paddingTop: '20px', textAlign: 'left' }}>
+                            <h4 style={{ color: '#ef4444', margin: '0 0 6px 0' }}>Zona de Perigo</h4>
+                            <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '15px' }}>Ao desativar sua conta, seus dados de extratos e carteiras ficarão congelados.</p>
+                            <button onClick={handleDeletarConta} style={styles.btnDeletar}>Inativar Meu Perfil</button>
+                        </div>
                     </div>
+
+                    {/* COLUNA 2: DIV GAVETA LATERAL DE EDIÇÃO */}
+                    {editando && (
+                        <div style={{ backgroundColor: '#1e1e1e', padding: '30px', borderRadius: '12px', border: '1px solid #2d2d2d' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h3 style={{ color: '#00d094', margin: 0 }}>Modificar Informações</h3>
+                                <button onClick={() => setEditando(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '18px', cursor: 'pointer' }}>✕</button>
+                            </div>
+
+                            <form onSubmit={handleAtualizarPerfil} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                
+                                <div>
+                                    <label style={styles.inputLabel}>Nova Foto de Perfil</label>
+                                    <input type="file" accept="image/*" onChange={handleFotoUpload} style={{ color: '#94a3b8', fontSize: '14px', width: '100%' }} />
+                                </div>
+
+                                <div>
+                                    <label style={styles.inputLabel}>Nome Completo *</label>
+                                    <input type="text" value={nome} onChange={e => setNome(e.target.value)} required style={styles.input} />
+                                </div>
+
+                                <div>
+                                    <label style={styles.inputLabel}>Nome Social (Opcional)</label>
+                                    <input type="text" placeholder="Como prefere ser chamado" value={nomeSocial} onChange={e => setNomeSocial(e.target.value)} style={styles.input} />
+                                </div>
+
+                                <div>
+                                    <label style={styles.inputLabel}>E-mail de Acesso *</label>
+                                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} required style={styles.input} />
+                                </div>
+
+                                <div>
+                                    <label style={styles.inputLabel}>Alterar Senha</label>
+                                    <input type="password" placeholder="Digite apenas para modificar" value={senha} onChange={e => setSenha(e.target.value)} style={styles.input} />
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                                    <button type="button" onClick={() => setEditando(false)} style={styles.btnCancelar}>Cancelar</button>
+                                    <button type="submit" style={styles.btnSalvar}>Gravar Dados</button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>
@@ -75,7 +242,12 @@ export function Perfil() {
 }
 
 const styles = {
-    input: { padding: '12px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#262626', color: '#fff', fontSize: '16px' },
-    btnSalvar: { padding: '14px', backgroundColor: '#00d094', color: '#121212', border: 'none', borderRadius: '25px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' },
-    btnDeletar: { padding: '10px 20px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold' }
+    input: { padding: '12px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#262626', color: '#fff', fontSize: '15px', width: '100%', boxSizing: 'border-box' },
+    inputLabel: { display: 'block', marginBottom: '6px', fontSize: '13px', color: '#94a3b8', fontWeight: '600' },
+    cardInfo: { padding: '12px', backgroundColor: '#161616', borderRadius: '8px', border: '1px solid #262626', display: 'flex', flexDirection: 'column', gap: '4px' },
+    cardLabel: { fontSize: '10px', color: '#64748b', fontWeight: 'bold' },
+    btnSalvar: { padding: '14px', backgroundColor: '#00d094', color: '#121212', border: 'none', borderRadius: '25px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' },
+    btnAlterar: { padding: '12px 24px', backgroundColor: '#2d2d2d', color: '#fff', border: '1px solid #444', borderRadius: '25px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' },
+    btnCancelar: { padding: '14px', backgroundColor: 'transparent', color: '#fff', border: '1px solid #444', borderRadius: '25px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' },
+    btnDeletar: { padding: '10px 20px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }
 };

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -19,7 +20,7 @@ public class TransacaoService {
     @Autowired
     private ContaRepository contaRepository;
 
-    // Listar extrato
+    // Listar extrato ordenado por data
     public List<Transacao> listarPorConta(int idConta) {
         return transacaoRepository.findByContaIdOrderByDataTransacaoDesc(idConta);
     }
@@ -31,32 +32,47 @@ public class TransacaoService {
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada."));
 
         transacao.setConta(conta);
-        transacao.setTipoCriacao("M"); // Manual
-        transacao.setStatus("A");      // Ativo
+        
+        if (transacao.getTipoCriacao() == null) {
+            transacao.setTipoCriacao("M");
+        }
+        transacao.setStatus("A");
+
+        atualizarSaldoConta(conta, transacao.getTipoTransacao().getId(), transacao.getValor(), "SOMA");
 
         return transacaoRepository.save(transacao);
     }
 
-    // Atualizar Transação
+    // Atualizar transação
     @Transactional
     public Transacao atualizar(int id, Transacao transacaoAtualizada) {
         Transacao transacaoExistente = transacaoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transação não encontrada para atualização."));
 
+        Conta conta = transacaoExistente.getConta();
+
+        atualizarSaldoConta(conta, transacaoExistente.getTipoTransacao().getId(), transacaoExistente.getValor(), "SUBTRACAO");
+
         transacaoExistente.setDescricao(transacaoAtualizada.getDescricao());
         transacaoExistente.setValor(transacaoAtualizada.getValor());
+        
+        if (transacaoAtualizada.getDescricaoOriginal() != null) {
+            transacaoExistente.setDescricaoOriginal(transacaoAtualizada.getDescricaoOriginal());
+        }
 
-        // Atualiza o tipo de transação
         if (transacaoAtualizada.getTipoTransacao() != null) {
             transacaoExistente.setTipoTransacao(transacaoAtualizada.getTipoTransacao());
         }
 
-        // Atualiza a categoria
         if (transacaoAtualizada.getTipoCategoria() != null) {
             transacaoExistente.setTipoCategoria(transacaoAtualizada.getTipoCategoria());
+        } else {
+            transacaoExistente.setTipoCategoria(null);
         }
 
         transacaoExistente.setStatus("A");
+
+        atualizarSaldoConta(conta, transacaoExistente.getTipoTransacao().getId(), transacaoExistente.getValor(), "SOMA");
 
         return transacaoRepository.save(transacaoExistente);
     }
@@ -65,7 +81,33 @@ public class TransacaoService {
     public void excluir(int id) {
         Transacao t = transacaoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transação não encontrada."));
+        
+        if ("I".equals(t.getStatus())) return;
+
+        Conta conta = t.getConta();
+
+        atualizarSaldoConta(conta, t.getTipoTransacao().getId(), t.getValor(), "SUBTRACAO");
+
         t.setStatus("I");
         transacaoRepository.save(t);
+    }
+
+    private void atualizarSaldoConta(Conta conta, int tipoTransacaoId, BigDecimal valor, String operacao) {
+        BigDecimal saldoAtual = conta.getSaldoAtual() != null ? conta.getSaldoAtual() : BigDecimal.ZERO;
+
+        if ("SOMA".equals(operacao)) {
+            if (tipoTransacaoId == 2) { 
+                conta.setSaldoAtual(saldoAtual.add(valor));
+            } else if (tipoTransacaoId == 1) { 
+                conta.setSaldoAtual(saldoAtual.subtract(valor));
+            }
+        } else if ("SUBTRACAO".equals(operacao)) {
+            if (tipoTransacaoId == 2) { 
+                conta.setSaldoAtual(saldoAtual.subtract(valor));
+            } else if (tipoTransacaoId == 1) { 
+                conta.setSaldoAtual(saldoAtual.add(valor));
+            }
+        }
+        contaRepository.save(conta);
     }
 }

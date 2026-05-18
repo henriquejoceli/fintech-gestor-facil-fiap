@@ -31,19 +31,6 @@ public class OcorrenciaInvestimento {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
-    @PrePersist
-    protected void onCreate() {
-        dataCadastro = LocalDateTime.now();
-        dataAtualizacao = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        dataAtualizacao = LocalDateTime.now();
-    }
-
-    // --- GETTERS AND SETTERS MANUALMENTE ---
-
     public Integer getId() {
         return id;
     }

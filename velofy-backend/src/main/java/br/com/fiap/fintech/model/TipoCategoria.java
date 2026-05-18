@@ -11,10 +11,10 @@ public class TipoCategoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(length = 1, nullable = false)
+    @Column(nullable = false, length = 1)
     private String tipo;
 
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false, length = 50)
     private String descricao;
 
     @Column(name = "data_cadastro", insertable = false, updatable = false)
@@ -28,21 +28,15 @@ public class TipoCategoria {
 
     public TipoCategoria() {}
 
+    // Getters e Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
-
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
-
     public LocalDateTime getDataCadastro() { return dataCadastro; }
-    public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }
-
     public LocalDateTime getDataAtualizacao() { return dataAtualizacao; }
-    public void setDataAtualizacao(LocalDateTime dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
-
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 }

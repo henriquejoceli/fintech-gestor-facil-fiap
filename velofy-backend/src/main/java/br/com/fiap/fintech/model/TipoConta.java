@@ -1,26 +1,42 @@
 package br.com.fiap.fintech.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "t_tipoconta")
+@Table(name = "T_TIPOCONTA")
 public class TipoConta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
-    @Column(length = 2, nullable = false)
+    @Column(nullable = false, length = 2)
     private String tipo;
 
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false, length = 50)
     private String descricao;
 
-    // --- GETTERS E SETTERS ---
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    @Column(name = "data_cadastro", insertable = false, updatable = false)
+    private LocalDateTime dataCadastro;
+
+    @Column(name = "data_atualizacao", insertable = false, updatable = false)
+    private LocalDateTime dataAtualizacao;
+
+    @Column(length = 1)
+    private String status = "A";
+
+    public TipoConta() {}
+
+    // Getters e Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
+    public LocalDateTime getDataCadastro() { return dataCadastro; }
+    public LocalDateTime getDataAtualizacao() { return dataAtualizacao; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
