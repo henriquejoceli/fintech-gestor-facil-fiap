@@ -4,7 +4,7 @@ import br.com.fiap.fintech.model.Investimento;
 import br.com.fiap.fintech.model.OcorrenciaInvestimento;
 import br.com.fiap.fintech.repository.InvestimentoRepository;
 import br.com.fiap.fintech.repository.OcorrenciaInvestimentoRepository;
-import br.com.fiap.fintech.repository.TipoInvestimentoRepository; // Import adicionado!
+import br.com.fiap.fintech.repository.TipoInvestimentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,51 +19,46 @@ public class InvestimentoService {
     private InvestimentoRepository investimentoRepository;
 
     @Autowired
-    private TipoInvestimentoRepository tipoInvestimentoRepository; // Injetado com sucesso!
+    private TipoInvestimentoRepository tipoInvestimentoRepository;
 
     @Autowired
     private OcorrenciaInvestimentoRepository ocorrenciaRepository;
 
-    // Lista os investimentos ativos de uma conta
+    @Autowired
+    private OcorrenciaCadastroService logService;
+
     public List<Investimento> listarPorConta(Integer idConta) {
         return investimentoRepository.findByContaIdAndStatus(idConta, "A");
     }
 
-    // Registra uma movimentação (Aporte ou Resgate) e atualiza o saldo do ativo
     @Transactional
     public OcorrenciaInvestimento movimentar(OcorrenciaInvestimento ocorrencia) {
         Investimento investimento;
+        boolean ehNovoInvestimento = false;
 
-        // 🎯 SE O INVESTIMENTO VIER SEM ID (OU ID ZERO), SIGNIFICA QUE É UM NOVO ATIVO!
         if (ocorrencia.getInvestimento() == null || ocorrencia.getInvestimento().getId() == null || ocorrencia.getInvestimento().getId() == 0) {
             
+            ehNovoInvestimento = true; // Sinalizador para o nosso log no final
             investimento = ocorrencia.getInvestimento();
             if (investimento == null) {
                 throw new RuntimeException("Dados do investimento não informados");
             }
             
-            // 🎯 CORREÇÃO DO ERRO TRANSIENTE:
-            // Pegamos o ID que veio do React, limpamos a instância transiente e buscamos o objeto gerenciado pelo JPA
             if (investimento.getTipoInvestimento() != null && investimento.getTipoInvestimento().getId() != 0) {
                 Integer idTipo = investimento.getTipoInvestimento().getId();
                 
-                // Busca a entidade persistida e gerenciada direto do banco
                 var tipoGerenciado = tipoInvestimentoRepository.findById(idTipo)
                         .orElseThrow(() -> new RuntimeException("Tipo de investimento com ID " + idTipo + " não existe no banco."));
                 
-                // Seta o objeto gerenciado pelo Hibernate
                 investimento.setTipoInvestimento(tipoGerenciado);
             } else {
                 throw new RuntimeException("O tipo de investimento (categoria do ativo) é obrigatório.");
             }
             
-            // Inicializa o valor zerado para o cálculo do aporte funcionar corretamente
             investimento.setValorAplicado(BigDecimal.ZERO);
             
-            // Salva o investimento pai primeiro para gerar o ID no banco com o Tipo amarrado
             investimento = investimentoRepository.save(investimento);
         } else {
-            // Se veio o ID, busca o investimento que já existe no banco
             investimento = investimentoRepository.findById(ocorrencia.getInvestimento().getId())
                     .orElseThrow(() -> new RuntimeException("Investimento não encontrado"));
         }
@@ -80,15 +75,34 @@ public class InvestimentoService {
             investimento.setValorAplicado(saldoAtual.subtract(valorMovimentado));
         }
 
-        // Salva a alteração no saldo do investimento
         investimentoRepository.save(investimento);
         
-        // Salva o log da ocorrência (extrato) vinculando o ID correto
         ocorrencia.setInvestimento(investimento);
-        return ocorrenciaRepository.save(ocorrencia);
+        OcorrenciaInvestimento ocorrenciaSalva = ocorrenciaRepository.save(ocorrencia);
+
+        // 🎯 LOGS DE AUDITORIA CORRIGIDOS UTILIZANDO O OBJETO CONTA
+        if (ehNovoInvestimento) {
+            logService.registrarLog(
+                investimento.getConta(),
+                "F",
+                "NOVO INVESTIMENTO",
+                "Nova carteira de investimento iniciada: Ativo '" + investimento.getNomeInvestimento() + "' alocado com sucesso."
+            );
+        } else {
+            String operacao = "E".equals(ocorrencia.getTipoMovimentacao()) ? "Aporte" : "Resgate";
+            
+            // 🎯 CORREÇÃO: Removida a chamada duplicada errada com int e mantido o padrão correto por objeto Conta
+            logService.registrarLog(
+                investimento.getConta(),
+                "F",
+                "ATUALIZACAO DE INVESTIMENTO",
+                "Movimentação de " + operacao + " no valor de R$ " + ocorrencia.getValor() + " efetuada no ativo '" + investimento.getNomeInvestimento() + "'."
+            );
+        }
+
+        return ocorrenciaSalva;
     }
 
-    // Busca o extrato de um investimento específico
     public List<OcorrenciaInvestimento> buscarExtrato(Integer idInvestimento) {
         return ocorrenciaRepository.findByInvestimentoIdOrderByDataCadastroDesc(idInvestimento);
     }

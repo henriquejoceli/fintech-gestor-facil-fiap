@@ -6,7 +6,7 @@ import { TransacoesGlobal } from './pages/TransacoesGlobal';
 import { Perfil } from './pages/Perfil';
 import { RecuperarSenha } from './pages/RecuperarSenha';
 import Contas from './pages/Contas';
-import Notificacoes from './pages/Notificacoes';
+import { Notificacoes } from './pages/Notificacoes';
 import Investimentos from './pages/Investimentos';
 import { NotFound } from './pages/NotFound';
 

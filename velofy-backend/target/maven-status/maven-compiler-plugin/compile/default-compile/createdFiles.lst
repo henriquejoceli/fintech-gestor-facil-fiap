@@ -12,6 +12,7 @@ br/com/fiap/fintech/service/TransacaoService.class
 br/com/fiap/fintech/model/TipoGenero.class
 br/com/fiap/fintech/service/InvestimentoService.class
 br/com/fiap/fintech/controller/TransacaoController.class
+br/com/fiap/fintech/repository/OcorrenciaCadastroRepository.class
 br/com/fiap/fintech/repository/TipoGeneroRepository.class
 br/com/fiap/fintech/FintechApplication.class
 br/com/fiap/fintech/model/OcorrenciaInvestimento.class
@@ -21,6 +22,8 @@ br/com/fiap/fintech/controller/TipoTransacaoController.class
 br/com/fiap/fintech/repository/OcorrenciaInvestimentoRepository.class
 br/com/fiap/fintech/repository/CadastroRepository.class
 br/com/fiap/fintech/model/Investimento.class
+br/com/fiap/fintech/service/OcorrenciaCadastroService.class
+br/com/fiap/fintech/controller/OcorrenciaCadastroController.class
 br/com/fiap/fintech/model/TipoConta.class
 br/com/fiap/fintech/repository/TipoCategoriaRepository.class
 br/com/fiap/fintech/repository/TipoInvestimentoRepository.class

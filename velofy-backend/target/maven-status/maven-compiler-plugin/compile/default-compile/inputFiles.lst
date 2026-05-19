@@ -11,6 +11,7 @@
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/model/Conta.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/dto/LoginRequest.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/CorsConfig.java
+/workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/service/OcorrenciaCadastroService.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/TipoOcorrenciaCadastroRepository.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/model/TipoGenero.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/InvestimentoRepository.java
@@ -20,6 +21,7 @@
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/TipoCategoriaRepository.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/service/TransacaoService.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/TransacaoRepository.java
+/workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/OcorrenciaCadastroRepository.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/service/ContaService.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/controller/TipoOcorrenciaCadastroController.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/controller/TransacaoController.java
@@ -32,6 +34,7 @@
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/OcorrenciaInvestimentoRepository.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/controller/TipoInvestimentoController.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/repository/ContaRepository.java
+/workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/controller/OcorrenciaCadastroController.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/service/CadastroService.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/service/InvestimentoService.java
 /workspaces/fintech-gestor-facil-fiap/velofy-backend/src/main/java/br/com/fiap/fintech/controller/TipoContaController.java

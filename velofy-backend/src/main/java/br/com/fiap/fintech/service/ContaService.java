@@ -20,6 +20,9 @@ public class ContaService {
     @Autowired
     private CadastroRepository cadastroRepository;
 
+    @Autowired
+    private OcorrenciaCadastroService logService;
+
     public List<Conta> listarPorUsuario(int idCadastro) {
         return contaRepository.findByCadastroId(idCadastro);
     }
@@ -34,9 +37,18 @@ public class ContaService {
         if (novaConta.getNomeInstituicao() == null) {
             novaConta.setNomeInstituicao("CARTEIRA");
         }
-        novaConta.setStatus("A"); // Ativo
+        novaConta.setStatus("A");
 
-        return contaRepository.save(novaConta);
+        Conta contaSalva = contaRepository.save(novaConta);
+
+        logService.registrarLog(
+            contaSalva,
+            "X",
+            "Criação de conta",
+            "Nova conta vinculada ao perfil: Instituição '" + contaSalva.getNomeInstituicao() + "'."
+        );
+
+        return contaSalva;
     }
 
     public Conta buscarPorId(int id) {
@@ -44,7 +56,6 @@ public class ContaService {
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada."));
     }
 
-    // Atualizar dados da conta
     @Transactional
     public Conta atualizar(int id, Conta contaAtualizada) {
         Conta existente = buscarPorId(id);
@@ -52,15 +63,30 @@ public class ContaService {
         if (contaAtualizada.getTipoConta() != null) {
             existente.setTipoConta(contaAtualizada.getTipoConta());
         }
-        return contaRepository.save(existente);
+        Conta contaSalva = contaRepository.save(existente);
+
+        logService.registrarLog(
+            contaSalva, 
+            "X", 
+            "ATUALIZACAO DE CONTA", 
+            "Dados da instituição '" + contaSalva.getNomeInstituicao() + "' foram atualizados."
+        );
+
+        return contaSalva;
     }
 
-    // Inativação da conta
     @Transactional
     public void excluir(int id) {
         Conta conta = buscarPorId(id);
         conta.setStatus("I");
         contaRepository.save(conta);
+
+        logService.registrarLog(
+            conta, 
+            "X", 
+            "ATUALIZACAO DE CONTA", 
+            "A conta vinculada à instituição '" + conta.getNomeInstituicao() + "' foi desativada."
+        );
     }
 
     @Transactional

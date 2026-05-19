@@ -17,7 +17,9 @@ public class CadastroService {
     @Autowired
     private CadastroRepository repository;
 
-    // Transformar a senha em Hash
+    @Autowired
+    private OcorrenciaCadastroService logService;
+
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public List<Cadastro> listarTodos() {
@@ -43,7 +45,6 @@ public class CadastroService {
         return repository.save(cadastro);
     }
 
-    // Autenticação
     public Cadastro autenticar(String email, String senhaPura) {
         Cadastro usuario = repository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("E-mail ou senha inválidos"));
@@ -61,7 +62,6 @@ public class CadastroService {
 
         cadastroExistente.setNome(dadosAtualizados.getNome());
         cadastroExistente.setEmail(dadosAtualizados.getEmail());
-        
         cadastroExistente.setNomeSocial(dadosAtualizados.getNomeSocial());
         
         if (dadosAtualizados.getFotoPerfil() != null) {
@@ -72,7 +72,16 @@ public class CadastroService {
             cadastroExistente.setSenha(passwordEncoder.encode(dadosAtualizados.getSenha()));
         }
 
-        return repository.save(cadastroExistente);
+        Cadastro salvo = repository.save(cadastroExistente);
+
+        logService.registrarLog(
+            salvo.getId(), 
+            "C", 
+            "Alteração cadastral", 
+            "As informações de perfil e configurações de conta foram atualizadas."
+        );
+
+        return salvo;
     }
 
     @Transactional
@@ -80,9 +89,15 @@ public class CadastroService {
         Cadastro cadastro = buscarPorId(id);
         cadastro.setStatus("I");
         repository.save(cadastro);
+
+        logService.registrarLog(
+            cadastro.getId(), 
+            "C", 
+            "Alteração cadastral", 
+            "Cadastro inativado."
+        );
     }
 
-    // 🎯 NOVO MÉTODO: Validação de segurança e redefinição de senha
     @Transactional
     public void recuperarSenha(String email, LocalDate dataNascimento, String novaSenhaPura) {
         Cadastro cadastro = repository.findByEmail(email)
@@ -94,5 +109,12 @@ public class CadastroService {
 
         cadastro.setSenha(passwordEncoder.encode(novaSenhaPura));
         repository.save(cadastro);
+
+        logService.registrarLog(
+            cadastro.getId(), 
+            "C", 
+            "Alteração de senha", 
+            "Senha alterada com sucesso!."
+        );
     }
 }

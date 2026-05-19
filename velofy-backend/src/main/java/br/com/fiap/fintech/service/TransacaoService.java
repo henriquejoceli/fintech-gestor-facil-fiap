@@ -20,7 +20,6 @@ public class TransacaoService {
     @Autowired
     private ContaRepository contaRepository;
 
-    // 🎯 INJEÇÃO DO SERVIÇO DE LOGS DE AUDITORIA
     @Autowired
     private OcorrenciaCadastroService logService;
 
@@ -46,13 +45,13 @@ public class TransacaoService {
 
         Transacao transacaoSalva = transacaoRepository.save(transacao);
 
-        // 🎯 GRAVAÇÃO TEXTUAL DA OCORRÊNCIA (ID 6 = Cadastro de transação)
         int idUsuario = conta.getCadastro().getId();
-        String sinal = transacao.getTipoTransacao().getId() == 2 ? "+" : "-";
+        
         logService.registrarLog(
-            idUsuario, 
-            6, 
-            "Nova movimentação criada: " + transacao.getDescricao() + " (" + sinal + " R$ " + transacao.getValor() + ") na instituição " + conta.getNomeInstituicao()
+            conta, 
+            "F", 
+            "Nova transação", 
+            "Movimentação de R$ " + transacao.getValor() + " adicionada."
         );
 
         return transacaoSalva;
@@ -91,12 +90,13 @@ public class TransacaoService {
 
         Transacao transacaoSalva = transacaoRepository.save(transacaoExistente);
 
-        // 🎯 GRAVAÇÃO TEXTUAL DA OCORRÊNCIA (ID 8 = Atualização sobre transação)
         int idUsuario = conta.getCadastro().getId();
+        
         logService.registrarLog(
-            idUsuario, 
-            8, 
-            "Movimentação alterada: " + transacaoSalva.getDescricao() + " modificada para o valor de R$ " + transacaoSalva.getValor()
+            conta, 
+            "F", 
+            "Atualização de transação", 
+            "Transação alterada: '" + transacaoSalva.getDescricao() + "' atualizada para o valor de R$ " + transacaoSalva.getValor()
         );
 
         return transacaoSalva;
@@ -117,11 +117,14 @@ public class TransacaoService {
         transacaoRepository.save(t);
 
         int idUsuario = conta.getCadastro().getId();
+        
         logService.registrarLog(
-            idUsuario, 
-            8, 
-            "Movimentação estornada/excluída do sistema: " + t.getDescricao() + " no valor de R$ " + t.getValor()
+            conta, 
+            "F", 
+            "Atualização de transação", 
+            "Transação estornada/excluída do sistema: '" + t.getDescricao() + "' no valor de R$ " + t.getValor()
         );
+
     }
 
     private void atualizarSaldoConta(Conta conta, int tipoTransacaoId, BigDecimal valor, String operacao) {
