@@ -22,7 +22,6 @@ export function Header() {
         </div>
       </div>
       <div style={styles.userSection}>
-        <span style={styles.username}>Olá, {usuarioLogado.nome?.split(' ')[0] || 'Usuário'}</span>
         <button onClick={handleLogout} style={styles.btnLogout}>
           <LogOut size={16} /> Sair
         </button>

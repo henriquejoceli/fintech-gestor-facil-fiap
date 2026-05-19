@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import br.com.fiap.fintech.dto.LoginRequest;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cadastros")
@@ -46,7 +48,7 @@ public class CadastroController {
         return ResponseEntity.ok(atualizado);
     }
 
-    // Deletar cadstro
+    // Deletar cadastro
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable int id) {
         service.excluir(id);
@@ -57,10 +59,24 @@ public class CadastroController {
     public ResponseEntity<?> login(@RequestBody LoginRequest login) {
         try {
             Cadastro usuario = service.autenticar(login.getEmail(), login.getSenha());
-
             return ResponseEntity.ok(usuario);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    // 🎯 ENDPOINT NOVO: Recebe os dados de reset do React em um Map prático
+    @PutMapping("/recuperar-senha")
+    public ResponseEntity<?> recuperarSenha(@RequestBody Map<String, String> dados) {
+        try {
+            String email = dados.get("email");
+            LocalDate dataNasc = LocalDate.parse(dados.get("dataNascimento"));
+            String novaSenha = dados.get("novaSenha");
+
+            service.recuperarSenha(email, dataNasc, novaSenha);
+            return ResponseEntity.ok().body("Senha atualizada com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

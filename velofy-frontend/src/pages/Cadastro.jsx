@@ -1,28 +1,35 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
-import { User, Mail, Lock, Calendar, Smile, UserPlus, ArrowLeft } from 'lucide-react';
+import { User, Mail, Lock, Calendar, Smile, UserPlus, ArrowLeft, AlertCircle } from 'lucide-react';
 
 export function Cadastro() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState(''); // Estado para validação de senha
+  const [confirmarSenha, setConfirmarSenha] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
   const [genero, setGenero] = useState('');
+  
+  // 🎯 NOVOS ESTADOS: Gerenciamento de mensagens embutidas na tela (Sem alerts!)
+  const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
+  const [enviando, setEnviando] = useState(false);
+  
   const navigate = useNavigate();
 
   const handleCadastro = async (e) => {
     e.preventDefault();
+    setMensagem({ tipo: '', texto: '' });
 
     // Validação se as senhas batem
     if (senha !== confirmarSenha) {
-      alert("As senhas não coincidem! Por favor, verifique a senha digitada.");
+      setMensagem({ tipo: 'erro', texto: 'As senhas não coincidem! Por favor, verifique a senha digitada.' });
       setConfirmarSenha(''); 
       return; 
     }
 
     try {
+      setEnviando(true);
       const novoUsuario = {
         nome,
         email,
@@ -31,12 +38,28 @@ export function Cadastro() {
         tipoGenero: { id: Number(genero) }
       };
 
-      await api.post('/cadastros', novoUsuario);
-      alert("Conta criada com sucesso no Oracle!");
-      navigate('/');
+      // 1. Faz o cadastro no banco
+      const response = await api.post('/cadastros', novoUsuario);
+      
+      // 2. Mensagem visual de sucesso
+      setMensagem({ tipo: 'sucesso', texto: 'Conta criada com sucesso!' });
+
+      // 3. LOGA AUTOMATICAMENTE: Salva os dados retornados pelo Java na sessão do navegador
+      localStorage.setItem('@Velofy:user', JSON.stringify(response.data));
+
+      // 4. Redireciona diretamente para o Dashboard após 1.5 segundos (tempo para o usuário ler a mensagem)
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+
     } catch (error) {
       console.error(error);
-      alert("Erro ao cadastrar. Verifique os dados.");
+      const msgErro = error.response?.data && typeof error.response.data === 'string'
+        ? error.response.data
+        : 'Erro ao cadastrar! Por favor, verifique os dados ou tente outro e-mail.';
+      setMensagem({ tipo: 'erro', texto: msgErro });
+    } finally {
+      setEnviando(false);
     }
   };
 
@@ -51,6 +74,19 @@ export function Cadastro() {
           <p style={styles.subtitle}>Preencha os campos abaixo para iniciar sua jornada.</p>
         </div>
 
+        {/* 🎯 ÁREA DE MENSAGENS PERSONALIZADAS DA INTERFACE */}
+        {mensagem.texto && (
+          <div style={{
+            ...styles.alertBox,
+            backgroundColor: mensagem.tipo === 'sucesso' ? 'rgba(0, 230, 118, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            borderColor: mensagem.tipo === 'sucesso' ? '#00e676' : '#ef4444',
+            color: CabecarioCor(mensagem.tipo)
+          }}>
+            <AlertCircle size={16} />
+            <span>{mensagem.texto}</span>
+          </div>
+        )}
+
         {/* FORMULÁRIO */}
         <form onSubmit={handleCadastro} style={styles.form}>
           
@@ -64,6 +100,7 @@ export function Cadastro() {
               value={nome} 
               onChange={e => setNome(e.target.value)} 
               required 
+              disabled={enviando}
               style={styles.input} 
             />
           </div>
@@ -73,11 +110,12 @@ export function Cadastro() {
               <Mail size={14} color="var(--texto-secundario)" /> E-mail
             </label>
             <input 
-              type="email" 
+              type="type" 
               placeholder="seu_email@email.com.br" 
               value={email} 
               onChange={e => setEmail(e.target.value)} 
               required 
+              disabled={enviando}
               style={styles.input} 
             />
           </div>
@@ -92,6 +130,7 @@ export function Cadastro() {
               value={senha} 
               onChange={e => setSenha(e.target.value)} 
               required 
+              disabled={enviando}
               style={styles.input} 
             />
           </div>
@@ -106,6 +145,7 @@ export function Cadastro() {
               value={confirmarSenha} 
               onChange={e => setConfirmarSenha(e.target.value)} 
               required 
+              disabled={enviando}
               style={styles.input} 
             />
           </div>
@@ -119,6 +159,7 @@ export function Cadastro() {
               value={dataNascimento} 
               onChange={e => setDataNascimento(e.target.value)} 
               required 
+              disabled={enviando}
               style={styles.input} 
             />
           </div>
@@ -131,6 +172,7 @@ export function Cadastro() {
               value={genero} 
               onChange={e => setGenero(e.target.value)} 
               required 
+              disabled={enviando}
               style={styles.input}
             >
               <option value="" disabled>Selecione o gênero</option>
@@ -142,8 +184,8 @@ export function Cadastro() {
             </select>
           </div>
 
-          <button type="submit" style={styles.button}>
-            Concluir Cadastro <UserPlus size={18} />
+          <button type="submit" disabled={enviando} style={{...styles.button, opacity: enviando ? 0.6 : 1}}>
+            {enviando ? 'Processando...' : 'Concluir Cadastro'} <UserPlus size={18} />
           </button>
         </form>
 
@@ -159,6 +201,11 @@ export function Cadastro() {
   );
 }
 
+// Função rápida de apoio para as cores das fontes das mensagens
+function CabecarioCor(tipo) {
+  return tipo === 'sucesso' ? '#00e676' : '#ef4444';
+}
+
 const styles = {
   container: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: 'var(--bg-principal)', padding: '40px 20px', fontFamily: 'sans-serif' },
   card: { backgroundColor: 'var(--bg-card)', padding: '40px', borderRadius: '16px', border: '1px solid var(--borda)', width: '100%', maxWidth: '440px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' },
@@ -172,5 +219,7 @@ const styles = {
   input: { padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--borda)', backgroundColor: 'var(--bg-input)', color: 'var(--texto-principal)', fontSize: '15px', outline: 'none' },
   button: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '14px', backgroundColor: 'var(--verde-velofy)', color: '#121212', border: 'none', borderRadius: '25px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'opacity 0.2s' },
   footer: { borderTop: '1px solid var(--borda)', marginTop: '25px', paddingTop: '20px', textAlign: 'center' },
-  backLink: { display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--texto-secundario)', textDecoration: 'none', fontSize: '14px', transition: 'color 0.2s' }
+  backLink: { display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--texto-secundario)', textDecoration: 'none', fontSize: '14px', transition: 'color 0.2s' },
+  // Estilo adicionado para a caixa de alertas embutida
+  alertBox: { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '8px', border: '1px solid', fontSize: '14px', marginBottom: '20px', lineHeight: '1.4' }
 };

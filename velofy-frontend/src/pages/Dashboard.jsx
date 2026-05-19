@@ -5,6 +5,9 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 
 export function Dashboard() {
+  // 🎯 RECUPERA OS DADOS DO USUÁRIO LOGADO DIRETO DA SESSÃO
+  const usuarioLogado = JSON.parse(localStorage.getItem('@Velofy:user') || '{}');
+
   // Estados para dados dinâmicos do banco
   const [contas, setContas] = useState([]);
   const [investimentos, setInvestimentos] = useState([]);
@@ -15,14 +18,18 @@ export function Dashboard() {
   const [totalBancos, setTotalBancos] = useState(0);
   const [totalInvestido, setTotalInvestido] = useState(0);
 
+  // 🎯 COMPORTAMENTO DO NOME: Prioriza o Nome Social se ele estiver preenchido no banco
+  const nomeExibicao = usuarioLogado.nomeSocial || usuarioLogado.nome || 'Usuário';
+
   useEffect(() => {
     async function carregarDashboard() {
       try {
-        const idUsuario = localStorage.getItem('usuarioId') || 1;
+        // Usa o ID dinâmico vindo da sessão unificada
+        const idUsuario = usuarioLogado.id || 1;
 
         // 1. Busca as contas bancárias do usuário
-        const respostaContas = await api.get(`/contas/usuario/${idUsuario}`);
-        const listaContas = respostaContas.data;
+        const respuestaContas = await api.get(`/contas/usuario/${idUsuario}`);
+        const listaContas = respuestaContas.data;
         setContas(listaContas);
 
         // Calcula o saldo somado dos bancos
@@ -31,20 +38,18 @@ export function Dashboard() {
 
         // 2. Busca os investimentos e as transações se houver contas cadastradas
         if (listaContas.length > 0) {
-          // Pega os investimentos vinculados à primeira conta encontrada (para consolidação)
           const idContaPrincipal = listaContas[0].id;
           
-          const respostaInvestimentos = await api.get(`/investimentos/conta/${idContaPrincipal}`);
-          setInvestimentos(respostaInvestimentos.data);
+          const respuestaInvestimentos = await api.get(`/investimentos/conta/${idContaPrincipal}`);
+          setInvestimentos(respuestaInvestimentos.data);
           
-          const saldoInvestidoSomado = respostaInvestimentos.data.reduce((acc, inv) => acc + (inv.valorAplicado || 0), 0);
+          const saldoInvestidoSomado = respuestaInvestimentos.data.reduce((acc, inv) => acc + (inv.valorAplicado || 0), 0);
           setTotalInvestido(saldoInvestidoSomado);
 
           // 3. Busca o histórico de transações da conta
-          const respostaTransacoes = await api.get(`/transacoes/conta/${idContaPrincipal}`);
-          // Ordena por ID ou data de forma decrescente para pegar as mais recentes
-          const ordenadas = respostaTransacoes.data.sort((a, b) => b.id - a.id);
-          setUltimasTransacoes(ordenadas.slice(0, 5)); // Pega apenas as 5 últimas
+          const respuestaTransacoes = await api.get(`/transacoes/conta/${idContaPrincipal}`);
+          const ordenadas = respuestaTransacoes.data.sort((a, b) => b.id - a.id);
+          setUltimasTransacoes(ordenadas.slice(0, 5));
         }
       } catch (err) {
         console.error("Erro ao carregar dados consolidados do dashboard", err);
@@ -54,7 +59,7 @@ export function Dashboard() {
     }
 
     carregarDashboard();
-  }, []);
+  }, [usuarioLogado.id]);
 
   return (
     <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
@@ -64,9 +69,12 @@ export function Dashboard() {
       {/* CONTEÚDO DO DASHBOARD */}
       <div style={{ padding: '32px 24px', boxSizing: 'border-box', flex: 1, maxWidth: '1200px', margin: '0 auto', width: '100%', color: '#fff' }}>
         
-        {/* BOAS-VINDAS */}
+        {/* BOAS-VINDAS CUSTOMIZADO */}
         <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '700' }}>Resumo Consolidado</h1>
+          {/* 🎯 SEU NOME DINÂMICO IMPLANTADO AQUI COM SUCESSO! */}
+          <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '700' }}>
+            Olá, <span style={{ color: '#00e676' }}>{nomeExibicao}</span>!
+          </h1>
           <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>Visão unificada das suas contas e patrimônio alocado.</p>
         </div>
 
@@ -164,8 +172,7 @@ export function Dashboard() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {ultimasTransacoes.length > 0 ? (
                   ultimasTransacoes.map(t => {
-                    // Descobre se é receita ou despesa pelo tipo de transação (Ex: crédito vs débito)
-                    const isReceita = t.tipoTransacao?.id === 2; // Supondo ID 2 como receita/crédito
+                    const isReceita = t.tipoTransacao?.id === 2;
                     return (
                       <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '8px', backgroundColor: '#141414', border: '1px solid #222' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

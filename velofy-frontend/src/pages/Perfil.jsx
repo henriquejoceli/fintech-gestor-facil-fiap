@@ -2,23 +2,31 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import api from '../services/api';
+import { createAvatar } from '@dicebear/core';
+import { croodles } from '@dicebear/collection';
 
 export function Perfil() {
     const navigate = useNavigate();
     const usuarioLogado = JSON.parse(localStorage.getItem('@Velofy:user') || '{}');
 
+    const gerarAvatarSvg = (semente) => {
+        const avatar = createAvatar(croodles, {
+            seed: semente,
+            backgroundColor: ['1e1e1e'],
+        });
+        return `data:image/svg+xml;utf8,${encodeURIComponent(avatar.toString())}`;
+    };
+
     const AVATARES_PRE_DEFINIDOS = [
-        { id: 'avatar1', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Felix' }, // Robozinho
-        { id: 'avatar2', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka' }, // Personagem 1
-        { id: 'avatar3', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jake' }, // Personagem 2
-        { id: 'avatar4', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Bubba' } // Aventureiro
+        { id: 'croodle1', url: gerarAvatarSvg('Henrique') },
+        { id: 'croodle2', url: gerarAvatarSvg('Gabriel') },
+        { id: 'croodle3', url: gerarAvatarSvg('Beatriz') },
+        { id: 'croodle4', url: gerarAvatarSvg('Alex') }
     ];
 
-    // Estados de Controle de Exibição
     const [perfilAtivo, setPerfilAtivo] = useState(null);
     const [editando, setEditando] = useState(false);
 
-    // Estados do Formulário de Edição
     const [nome, setNome] = useState('');
     const [nomeSocial, setNomeSocial] = useState('');
     const [email, setEmail] = useState('');
@@ -75,7 +83,7 @@ export function Perfil() {
         try {
             const dadosAtualizados = { 
                 nome, 
-                nomeSocial: nomeSocial.trim() === '' ? null : nomeSocial, // Deixa null se estiver vazio
+                nomeSocial: nomeSocial.trim() === '' ? null : nomeSocial,
                 email,
                 fotoPerfil: fotoBase64
             };
@@ -84,11 +92,10 @@ export function Perfil() {
 
             const response = await api.put(`/cadastros/${usuarioLogado.id}`, dadosAtualizados);
 
-            // Sincroniza os novos dados de sessão
             localStorage.setItem('@Velofy:user', JSON.stringify(response.data));
-            alert("Perfil atualizado com sucesso!");
+            alert("Perfil updated com sucesso!");
             setEditando(false);
-            buscarDadosPerfil(); // Atualiza a tela
+            buscarDadosPerfil(); 
         } catch (error) {
             console.error(error);
             alert("Erro ao atualizar perfil.");
@@ -122,43 +129,16 @@ export function Perfil() {
                     {/* COLUNA 1: DETALHES DO PERFIL ATUAL */}
                     <div style={{ backgroundColor: '#1e1e1e', padding: '30px', borderRadius: '12px', border: '1px solid #2d2d2d', textAlign: 'center' }}>
                         
-                        {/* Avatar Redondo customizável */}
-                        <div>
-                            <label style={styles.inputLabel}>Foto de Perfil</label>
-                            
-                            {/* 🎯 NOVA SEÇÃO: Seleção de Avatares Prontos */}
-                            <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#64748b' }}>Escolha um personagem ou faça upload de um arquivo:</p>
-                            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', justifyContent: 'center', backgroundColor: '#161616', padding: '10px', borderRadius: '8px', border: '1px solid #262626' }}>
-                                {AVATARES_PRE_DEFINIDOS.map((avatar) => (
-                                    <img
-                                        key={avatar.id}
-                                        src={avatar.url}
-                                        alt="Opção de Avatar"
-                                        onClick={() => setFotoBase64(avatar.url)} // 🎯 Ao clicar, o link vira a foto de perfil
-                                        style={{
-                                            width: '50px',
-                                            height: '50px',
-                                            borderRadius: '50%',
-                                            cursor: 'pointer',
-                                            backgroundColor: '#2d2d2d',
-                                            border: fotoBase64 === avatar.url ? '2px solid #00d094' : '2px solid transparent',
-                                            transition: 'all 0.2s ease',
-                                            transform: fotoBase64 === avatar.url ? 'scale(1.1)' : 'scale(1)'
-                                        }}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* Input tradicional por arquivo (mantido como segunda opção) */}
-                            <input 
-                                type="file" 
-                                accept="image/*" 
-                                onChange={handleFotoUpload} 
-                                style={{ color: '#94a3b8', fontSize: '14px', width: '100%' }} 
-                            />
+                        {/* 🎯 ADICIONADO: Círculo de Avatar que de fato exibe a foto atual (Base64 ou SVG local) */}
+                        <div style={{ width: '110px', height: '110px', borderRadius: '50%', backgroundColor: '#2d2d2d', margin: '0 auto 20px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '3px solid #00d094' }}>
+                            {fotoBase64 ? (
+                                <img src={fotoBase64} alt="Foto Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <span style={{ fontSize: '32px', color: '#94a3b8' }}>{nome.charAt(0).toUpperCase()}</span>
+                            )}
                         </div>
 
-                        {/* 🎯 TRATAMENTO EXCLUSIVO DO NOME SOCIAL: */}
+                        {/* TRATAMENTO DO NOME SOCIAL */}
                         {perfilAtivo?.nomeSocial ? (
                             <div>
                                 <h2 style={{ color: '#00d094', margin: '0 0 4px 0' }}>{perfilAtivo.nomeSocial}</h2>
@@ -202,9 +182,38 @@ export function Perfil() {
 
                             <form onSubmit={handleAtualizarPerfil} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 
+                                {/* 🎯 MIGRADO PARA AQUI: Escolha de Avatares locais + Upload de arquivos */}
                                 <div>
-                                    <label style={styles.inputLabel}>Nova Foto de Perfil</label>
-                                    <input type="file" accept="image/*" onChange={handleFotoUpload} style={{ color: '#94a3b8', fontSize: '14px', width: '100%' }} />
+                                    <label style={styles.inputLabel}>Foto de Perfil</label>
+                                    <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#64748b' }}>Escolha um personagem Croodles ou faça upload de um arquivo:</p>
+                                    
+                                    <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', justifyContent: 'center', backgroundColor: '#161616', padding: '10px', borderRadius: '8px', border: '1px solid #262626' }}>
+                                        {AVATARES_PRE_DEFINIDOS.map((avatar) => (
+                                            <img
+                                                key={avatar.id}
+                                                src={avatar.url}
+                                                alt="Opção de Avatar"
+                                                onClick={() => setFotoBase64(avatar.url)} 
+                                                style={{
+                                                    width: '50px',
+                                                    height: '50px',
+                                                    borderRadius: '50%',
+                                                    cursor: 'pointer',
+                                                    backgroundColor: '#2d2d2d',
+                                                    border: fotoBase64 === avatar.url ? '2px solid #00d094' : '2px solid transparent',
+                                                    transition: 'all 0.2s ease',
+                                                    transform: fotoBase64 === avatar.url ? 'scale(1.1)' : 'scale(1)'
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleFotoUpload} 
+                                        style={{ color: '#94a3b8', fontSize: '14px', width: '100%' }} 
+                                    />
                                 </div>
 
                                 <div>

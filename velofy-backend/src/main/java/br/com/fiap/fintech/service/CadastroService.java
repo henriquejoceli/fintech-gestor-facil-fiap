@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -78,6 +79,20 @@ public class CadastroService {
     public void excluir(int id) {
         Cadastro cadastro = buscarPorId(id);
         cadastro.setStatus("I");
+        repository.save(cadastro);
+    }
+
+    // 🎯 NOVO MÉTODO: Validação de segurança e redefinição de senha
+    @Transactional
+    public void recuperarSenha(String email, LocalDate dataNascimento, String novaSenhaPura) {
+        Cadastro cadastro = repository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Dados incorretos! Usuário não encontrado."));
+
+        if (!cadastro.getDataNascimento().equals(dataNascimento)) {
+            throw new RuntimeException("Dados incorretos! Verifique as informações fornecidas.");
+        }
+
+        cadastro.setSenha(passwordEncoder.encode(novaSenhaPura));
         repository.save(cadastro);
     }
 }

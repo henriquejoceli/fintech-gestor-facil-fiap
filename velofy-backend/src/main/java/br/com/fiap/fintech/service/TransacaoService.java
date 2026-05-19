@@ -20,6 +20,10 @@ public class TransacaoService {
     @Autowired
     private ContaRepository contaRepository;
 
+    // 🎯 INJEÇÃO DO SERVIÇO DE LOGS DE AUDITORIA
+    @Autowired
+    private OcorrenciaCadastroService logService;
+
     // Listar extrato ordenado por data
     public List<Transacao> listarPorConta(int idConta) {
         return transacaoRepository.findByContaIdOrderByDataTransacaoDesc(idConta);
@@ -40,7 +44,18 @@ public class TransacaoService {
 
         atualizarSaldoConta(conta, transacao.getTipoTransacao().getId(), transacao.getValor(), "SOMA");
 
-        return transacaoRepository.save(transacao);
+        Transacao transacaoSalva = transacaoRepository.save(transacao);
+
+        // 🎯 GRAVAÇÃO TEXTUAL DA OCORRÊNCIA (ID 6 = Cadastro de transação)
+        int idUsuario = conta.getCadastro().getId();
+        String sinal = transacao.getTipoTransacao().getId() == 2 ? "+" : "-";
+        logService.registrarLog(
+            idUsuario, 
+            6, 
+            "Nova movimentação criada: " + transacao.getDescricao() + " (" + sinal + " R$ " + transacao.getValor() + ") na instituição " + conta.getNomeInstituicao()
+        );
+
+        return transacaoSalva;
     }
 
     // Atualizar transação
@@ -74,7 +89,17 @@ public class TransacaoService {
 
         atualizarSaldoConta(conta, transacaoExistente.getTipoTransacao().getId(), transacaoExistente.getValor(), "SOMA");
 
-        return transacaoRepository.save(transacaoExistente);
+        Transacao transacaoSalva = transacaoRepository.save(transacaoExistente);
+
+        // 🎯 GRAVAÇÃO TEXTUAL DA OCORRÊNCIA (ID 8 = Atualização sobre transação)
+        int idUsuario = conta.getCadastro().getId();
+        logService.registrarLog(
+            idUsuario, 
+            8, 
+            "Movimentação alterada: " + transacaoSalva.getDescricao() + " modificada para o valor de R$ " + transacaoSalva.getValor()
+        );
+
+        return transacaoSalva;
     }
 
     @Transactional
@@ -90,6 +115,13 @@ public class TransacaoService {
 
         t.setStatus("I");
         transacaoRepository.save(t);
+
+        int idUsuario = conta.getCadastro().getId();
+        logService.registrarLog(
+            idUsuario, 
+            8, 
+            "Movimentação estornada/excluída do sistema: " + t.getDescricao() + " no valor de R$ " + t.getValor()
+        );
     }
 
     private void atualizarSaldoConta(Conta conta, int tipoTransacaoId, BigDecimal valor, String operacao) {

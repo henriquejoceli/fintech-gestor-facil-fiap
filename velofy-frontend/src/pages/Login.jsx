@@ -67,7 +67,9 @@ export function Login() {
             />
           </div>
 
-          <a href="#" style={styles.forgotPassword}>Esqueceu sua senha?</a>
+          <Link to="/recuperar-senha" style={styles.forgotPassword}>
+            Esqueceu sua senha?
+          </Link>
 
           <button type="submit" disabled={loading} style={styles.btnSubmit}>
             {loading ? (
