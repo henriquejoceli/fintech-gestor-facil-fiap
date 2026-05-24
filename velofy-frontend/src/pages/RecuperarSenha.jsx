@@ -59,15 +59,15 @@ export function RecuperarSenha() {
         </div>
 
         {mensagem.texto && (
-          <div style={{
-            ...styles.alertBox,
-            backgroundColor: mensaje.tipo === 'sucesso' ? 'rgba(0, 230, 118, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-            borderColor: mensagem.tipo === 'sucesso' ? '#00e676' : '#ef4444',
-            color: mensagem.tipo === 'sucesso' ? '#00e676' : '#ef4444'
-          }}>
-            <AlertCircle size={16} />
-            <span>{mensagem.texto}</span>
-          </div>
+            <div style={{
+              ...styles.alertBox,
+             backgroundColor: mensagem.tipo === 'sucesso' ? 'rgba(0, 230, 118, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              borderColor: mensagem.tipo === 'sucesso' ? '#00e676' : '#ef4444',
+              color: mensagem.tipo === 'sucesso' ? '#00e676' : '#ef4444'
+            }}>
+              <AlertCircle size={16} />
+              <span>{mensagem.texto}</span>
+            </div>
         )}
 
         <form onSubmit={handleRecuperar} style={styles.form}>
