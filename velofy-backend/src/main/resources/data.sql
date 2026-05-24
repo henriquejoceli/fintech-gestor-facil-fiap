@@ -48,7 +48,7 @@ insert into t_tipoinvestimento (id, tipo, descricao, risco, prazo, desconto_ir, 
 insert into t_tipoinvestimento (id, tipo, descricao, risco, prazo, desconto_ir, status) values (5, 'E', 'Fundos de investimento', 'M', 'M', 'S', 'A');
 insert into t_tipoinvestimento (id, tipo, descricao, risco, prazo, desconto_ir, status) values (6, 'F', 'Ações / renda variável', 'A', 'L', 'N', 'A');
 
--- 6. TIPO DE OCORRÊNCIAS DO CADASTRO (NORMALIZADO EM UPPER CASE E SEM ACENTOS)
+-- 6. TIPO DE OCORRÊNCIAS DO CADASTRO
 DELETE FROM t_tipoocorrenciacadastro;
 INSERT INTO t_tipoocorrenciacadastro (id, tipo, descricao, status) VALUES (1, 'C', 'ALTERACAO DE SENHA', 'A');
 INSERT INTO t_tipoocorrenciacadastro (id, tipo, descricao, status) VALUES (2, 'C', 'ALTERACAO CADASTRAL', 'A');

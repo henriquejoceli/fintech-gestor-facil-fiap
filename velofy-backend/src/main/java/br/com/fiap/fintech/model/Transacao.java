@@ -64,7 +64,6 @@ public class Transacao {
         this.status = "A";
     }
 
-    // Getters e Setters existentes
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

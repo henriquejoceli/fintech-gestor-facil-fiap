@@ -14,9 +14,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Libera todos os endpoints da API
-                        .allowedOrigins("*") // Libera qualquer origem (perfeito para o Codespaces)
+                        .allowedOrigins("*") // Libera qualquer origem
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
-                        .allowedHeaders("*"); // Libera todos os cabeçalhos (inclusive Content-Type)
+                        .allowedHeaders("*"); // Libera todos os cabeçalhos
             }
         };
     }

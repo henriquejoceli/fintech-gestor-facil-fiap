@@ -38,7 +38,7 @@ public class InvestimentoService {
 
         if (ocorrencia.getInvestimento() == null || ocorrencia.getInvestimento().getId() == null || ocorrencia.getInvestimento().getId() == 0) {
             
-            ehNovoInvestimento = true; // Sinalizador para o nosso log no final
+            ehNovoInvestimento = true;
             investimento = ocorrencia.getInvestimento();
             if (investimento == null) {
                 throw new RuntimeException("Dados do investimento não informados");
@@ -80,7 +80,6 @@ public class InvestimentoService {
         ocorrencia.setInvestimento(investimento);
         OcorrenciaInvestimento ocorrenciaSalva = ocorrenciaRepository.save(ocorrencia);
 
-        // 🎯 LOGS DE AUDITORIA CORRIGIDOS UTILIZANDO O OBJETO CONTA
         if (ehNovoInvestimento) {
             logService.registrarLog(
                 investimento.getConta(),
@@ -91,7 +90,6 @@ public class InvestimentoService {
         } else {
             String operacao = "E".equals(ocorrencia.getTipoMovimentacao()) ? "Aporte" : "Resgate";
             
-            // 🎯 CORREÇÃO: Removida a chamada duplicada errada com int e mantido o padrão correto por objeto Conta
             logService.registrarLog(
                 investimento.getConta(),
                 "F",

@@ -8,7 +8,7 @@ export default function Contas() {
   const [contas, setContas] = useState([]);
   const [nomeInstituicao, setNomeInstituicao] = useState('');
   const [saldoInicial, setSaldoInicial] = useState('');
-  const [tipoConta, setTipoConta] = useState('PF'); // Alterado default para bater com o select
+  const [tipoConta, setTipoConta] = useState('PF');
   
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
@@ -146,7 +146,7 @@ export default function Contas() {
             </form>
           </div>
 
-          {/* LISTA DE CONTAS COM VERIFICAÇÃO */}
+          {/* LISTA DE CONTAS */}
           <div style={{ backgroundColor: '#0f0f0f', padding: '24px', borderRadius: '12px', border: '1px solid #1f1f1f', display: 'flex', flexDirection: 'column' }}>
             <h2 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Building size={20} color="#00e676" /> Minhas Contas

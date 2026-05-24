@@ -58,8 +58,6 @@ public class Investimento {
         dataAtualizacao = LocalDateTime.now();
     }
 
-    // --- GETTERS AND SETTERS MANUALMENTE ---
-
     public Integer getId() {
         return id;
     }

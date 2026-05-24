@@ -65,7 +65,6 @@ public class CadastroController {
         }
     }
 
-    // 🎯 ENDPOINT NOVO: Recebe os dados de reset do React em um Map prático
     @PutMapping("/recuperar-senha")
     public ResponseEntity<?> recuperarSenha(@RequestBody Map<String, String> dados) {
         try {

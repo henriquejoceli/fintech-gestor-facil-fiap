@@ -17,13 +17,13 @@ public class InvestimentoController {
     @Autowired
     private InvestimentoService investimentoService;
 
-    // GET /api/investimentos/conta/{id} -> Retorna os investimentos do usuário
+    // Retorna os investimentos do usuário
     @GetMapping("/conta/{idConta}")
     public ResponseEntity<List<Investimento>> listarPorConta(@PathVariable Integer idConta) {
         return ResponseEntity.ok(investimentoService.listarPorConta(idConta));
     }
 
-    // POST /api/investimentos/movimentar -> Faz um aporte ou resgate
+    // Faz um aporte ou resgate
     @PostMapping("/movimentar")
     public ResponseEntity<?> movimentar(@RequestBody OcorrenciaInvestimento ocorrencia) {
         try {
@@ -34,7 +34,7 @@ public class InvestimentoController {
         }
     }
 
-    // GET /api/investimentos/{id}/extrato -> Retorna o histórico de aportes/resgates
+    // Retorna o histórico de aportes/resgates
     @GetMapping("/{idInvestimento}/extrato")
     public ResponseEntity<List<OcorrenciaInvestimento>> buscarExtrato(@PathVariable Integer idInvestimento) {
         return ResponseEntity.ok(investimentoService.buscarExtrato(idInvestimento));

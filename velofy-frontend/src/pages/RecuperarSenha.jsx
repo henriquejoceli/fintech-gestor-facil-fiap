@@ -31,13 +31,12 @@ export function RecuperarSenha() {
         novaSenha
       };
 
-      // Dispara a requisição para o endpoint PUT que criamos no Java
       await api.put('/cadastros/recuperar-senha', payload);
       
       setMensagem({ tipo: 'sucesso', texto: 'Sua senha foi redefinida com sucesso! Redirecionando para o login...' });
       
       setTimeout(() => {
-        navigate('/'); // Joga o usuário de volta para a tela de login
+        navigate('/');
       }, 2000);
 
     } catch (error) {

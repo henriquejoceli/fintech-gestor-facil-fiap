@@ -9,7 +9,6 @@ export function Notificacoes() {
   const [filtro, setFiltro] = useState('todas');
   const [loading, setLoading] = useState(true);
 
-  // 🎯 AGORA O MAPA USA A LETRA DO TIPO COMO CHAVE! Muito mais seguro.
   const CONFIG_VISUAL_POR_TIPO = {
     'C': { icone: <Key size={20} color="#3b82f6" />, cor: '#3b82f6' },
     'F': { icone: <ArrowRightLeft size={20} color="#00e676" />, cor: '#00e676' },
@@ -36,20 +35,17 @@ export function Notificacoes() {
           const dadosLogs = Array.isArray(respostaLogs.data) ? respostaLogs.data : [];
           
           const logsFormatados = dadosLogs.map(log => {
-            // Pegamos a letra do tipo ('C', 'F', 'X', etc.) que vem direto do Java
             const letraTipo = log.tipoOcorrenciaCadastro?.tipo || 'M';
             
-            // Pega o visual correspondente àquela letra
             const visual = CONFIG_VISUAL_POR_TIPO[letraTipo] || CONFIG_VISUAL_POR_TIPO['M'];
 
-            // Formata o título bonitinho: Se for tudo maiúsculo do banco, transforma em Capitalizado
             const tituloFormatado = log.tipoOcorrenciaCadastro?.descricao 
               ? log.tipoOcorrenciaCadastro.descricao.charAt(0) + log.tipoOcorrenciaCadastro.descricao.slice(1).toLowerCase()
               : 'Notificação do Sistema';
 
             return {
               id: log.id,
-              categoria: letraTipo, // Vincula a categoria à letra ('C', 'F', etc.) para o filtro do select funcionar
+              categoria: letraTipo,
               titulo: tituloFormatado,
               mensagem: log.descricao,
               data: log.dataCadastro ? new Date(log.dataCadastro).toLocaleString('pt-BR') : 'Agora',
@@ -58,7 +54,7 @@ export function Notificacoes() {
             };
           });
 
-          setNotificacoes(logsFormatados.reverse()); // Mais novos no topo
+          setNotificacoes(logsFormatados.reverse());
         } else {
           setNotificacoes([]);
         }
@@ -101,7 +97,7 @@ export function Notificacoes() {
             >
               <option value="todas">Todas as Atividades</option>
               <option value="C">Segurança e Cadastro</option>
-              <option value="X">Gestão de Carteiras / Contas</option> {/* 🎯 FILTRO ADICIONADO */}
+              <option value="X">Gestão de Carteiras / Contas</option>
               <option value="F">Movimentações Financeiras</option>
               <option value="S">Alertas de Sistema</option>
             </select>

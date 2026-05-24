@@ -5,10 +5,8 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 
 export function Dashboard() {
-  // 🎯 RECUPERA OS DADOS DO USUÁRIO LOGADO DIRETO DA SESSÃO
   const usuarioLogado = JSON.parse(localStorage.getItem('@Velofy:user') || '{}');
 
-  // Estados para dados dinâmicos do banco
   const [contas, setContas] = useState([]);
   const [investimentos, setInvestimentos] = useState([]);
   const [ultimasTransacoes, setUltimasTransacoes] = useState([]);
@@ -18,13 +16,11 @@ export function Dashboard() {
   const [totalBancos, setTotalBancos] = useState(0);
   const [totalInvestido, setTotalInvestido] = useState(0);
 
-  // 🎯 COMPORTAMENTO DO NOME: Prioriza o Nome Social se ele estiver preenchido no banco
   const nomeExibicao = usuarioLogado.nomeSocial || usuarioLogado.nome || 'Usuário';
 
   useEffect(() => {
     async function carregarDashboard() {
       try {
-        // Usa o ID dinâmico vindo da sessão unificada
         const idUsuario = usuarioLogado.id || 1;
 
         // 1. Busca as contas bancárias do usuário
@@ -71,7 +67,7 @@ export function Dashboard() {
         
         {/* BOAS-VINDAS CUSTOMIZADO */}
         <div style={{ marginBottom: '32px' }}>
-          {/* 🎯 SEU NOME DINÂMICO IMPLANTADO AQUI COM SUCESSO! */}
+          {/* NOME DINÂMICO */}
           <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '700' }}>
             Olá, <span style={{ color: '#00e676' }}>{nomeExibicao}</span>!
           </h1>
@@ -163,7 +159,7 @@ export function Dashboard() {
 
             </div>
 
-            {/* SEÇÃO INFERIOR: ÚLTIMAS TRANSAÇÕES DETALHADAS */}
+            {/* ÚLTIMAS TRANSAÇÕES DETALHADAS */}
             <div style={{ backgroundColor: '#0f0f0f', padding: '24px', borderRadius: '12px', border: '1px solid #1f1f1f' }}>
               <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Clock size={18} color="#00e676" /> Últimas Movimentações

@@ -23,12 +23,10 @@ public class TransacaoService {
     @Autowired
     private OcorrenciaCadastroService logService;
 
-    // Listar extrato ordenado por data
     public List<Transacao> listarPorConta(int idConta) {
         return transacaoRepository.findByContaIdOrderByDataTransacaoDesc(idConta);
     }
 
-    // Criar Transação
     @Transactional
     public Transacao salvar(int idConta, Transacao transacao) {
         Conta conta = contaRepository.findById(idConta)
@@ -57,7 +55,6 @@ public class TransacaoService {
         return transacaoSalva;
     }
 
-    // Atualizar transação
     @Transactional
     public Transacao atualizar(int id, Transacao transacaoAtualizada) {
         Transacao transacaoExistente = transacaoRepository.findById(id)

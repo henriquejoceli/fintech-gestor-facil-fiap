@@ -11,7 +11,6 @@ export function Cadastro() {
   const [dataNascimento, setDataNascimento] = useState('');
   const [genero, setGenero] = useState('');
   
-  // 🎯 NOVOS ESTADOS: Gerenciamento de mensagens embutidas na tela (Sem alerts!)
   const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
   const [enviando, setEnviando] = useState(false);
   
@@ -44,10 +43,10 @@ export function Cadastro() {
       // 2. Mensagem visual de sucesso
       setMensagem({ tipo: 'sucesso', texto: 'Conta criada com sucesso!' });
 
-      // 3. LOGA AUTOMATICAMENTE: Salva os dados retornados pelo Java na sessão do navegador
+      // 3. Loga automaticamente
       localStorage.setItem('@Velofy:user', JSON.stringify(response.data));
 
-      // 4. Redireciona diretamente para o Dashboard após 1.5 segundos (tempo para o usuário ler a mensagem)
+      // 4. Redireciona para o Dashboard após 1.5 segundos
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
@@ -74,7 +73,7 @@ export function Cadastro() {
           <p style={styles.subtitle}>Preencha os campos abaixo para iniciar sua jornada.</p>
         </div>
 
-        {/* 🎯 ÁREA DE MENSAGENS PERSONALIZADAS DA INTERFACE */}
+        {/* ÁREA DE MENSAGENS DA INTERFACE */}
         {mensagem.texto && (
           <div style={{
             ...styles.alertBox,

@@ -54,7 +54,6 @@ export default function Investimentos() {
     try {
       const resposta = await api.get(`/investimentos/conta/${idConta}`);
       
-      // 🎯 ADICIONE ESSA LINHA AQUI:
       console.log("INVESTIMENTOS VINDOS DO JAVA:", resposta.data);
       
       setInvestimentos(resposta.data);

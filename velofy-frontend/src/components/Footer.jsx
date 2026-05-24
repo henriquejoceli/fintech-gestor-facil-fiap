@@ -3,7 +3,7 @@ export function Footer() {
 
   return (
     <footer style={styles.footer}>
-      <p style={styles.text}>&copy; {anoAtual} Velofy Finanças Patrocinadas. Todos os direitos reservados.</p>
+      <p style={styles.text}>&copy; {anoAtual} Velofy. Todos os direitos reservados.</p>
       <div style={styles.badgeContainer}>
         <span style={styles.badge}>FIAP INTEGRATED PROJECT</span>
       </div>

@@ -34,7 +34,7 @@ export function Navbar() {
         <span style={{ color: '#00e676', fontSize: '20px', fontWeight: '800', letterSpacing: '0.5px' }}>Velofy</span>
       </div>
 
-      {/* 🧭 LINKS DA BARRA SUPERIOR ATUALIZADOS */}
+      {/* LINKS DA BARRA SUPERIOR ATUALIZADOS */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         
         {/* Início / Dashboard */}
@@ -77,9 +77,6 @@ export function Navbar() {
 
       {/* SEÇÃO USUÁRIO / SAIR */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <span style={{ fontSize: '13px', color: '#666' }}>
-          Olá, <strong style={{ color: '#fff' }}>Henrique</strong>
-        </span>
         
         <button 
           onClick={handleLogout}

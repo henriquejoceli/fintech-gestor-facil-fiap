@@ -24,11 +24,9 @@ export function TransacoesGlobal() {
       setLoading(true);
       const idUsuario = localStorage.getItem('usuarioId') || 1;
       
-      // 1. Busca as categorias reais cadastradas na t_tipocategoria
       const respostaCategorias = await api.get('/tipos-categorias');
       setCategorias(respostaCategorias.data);
       
-      // 2. Busca as contas do usuário
       const respostaContas = await api.get(`/contas/usuario/${idUsuario}`);
       setContas(respostaContas.data);
       
@@ -36,7 +34,6 @@ export function TransacoesGlobal() {
         const idContaPrincipal = respostaContas.data[0].id;
         setContaSelecionada(idContaPrincipal);
 
-        // 3. Busca o histórico de transações da conta ativa
         const respostaTransacoes = await api.get(`/transacoes/conta/${idContaPrincipal}`);
         const ordenadas = respostaTransacoes.data.sort((a, b) => b.id - a.id);
         setTransacoes(ordenadas);
@@ -170,7 +167,6 @@ export function TransacoesGlobal() {
                   onChange={(e) => setCategoriaSelecionada(e.target.value)}
                   style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #2a2a2a', backgroundColor: '#141414', color: '#fff' }}
                 >
-                  {/* 🎯 FILTRO INTELIGENTE: Só exibe as categorias que dão match com o Tipo clicado */}
                   {categorias
                     .filter(cat => cat.tipo === tipoTransacao)
                     .map(cat => (

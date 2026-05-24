@@ -33,7 +33,6 @@ export function Perfil() {
     const [senha, setSenha] = useState('');
     const [fotoBase64, setFotoBase64] = useState('');
 
-    // Busca as informações atualizadas direto do Banco de Dados
     const buscarDadosPerfil = async () => {
         if (!usuarioLogado.id) {
             navigate('/');
@@ -43,7 +42,6 @@ export function Perfil() {
             const response = await api.get(`/cadastros/${usuarioLogado.id}`);
             setPerfilAtivo(response.data);
             
-            // Popula os inputs com as informações do banco
             setNome(response.data.nome || '');
             setNomeSocial(response.data.nomeSocial || '');
             setEmail(response.data.email || '');
@@ -182,7 +180,7 @@ export function Perfil() {
 
                             <form onSubmit={handleAtualizarPerfil} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 
-                                {/* 🎯 MIGRADO PARA AQUI: Escolha de Avatares locais + Upload de arquivos */}
+                                {/* Escolha de Avatares locais + Upload de arquivos */}
                                 <div>
                                     <label style={styles.inputLabel}>Foto de Perfil</label>
                                     <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#64748b' }}>Escolha um personagem Croodles ou faça upload de um arquivo:</p>
